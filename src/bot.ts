@@ -1,8 +1,8 @@
 import TelegramBot from "node-telegram-bot-api";
 import nodeCron from 'node-cron';
 
-const token = "7881860290:AAErw7n9nApbIQtt-RfwjERf6RfOwov4Se8";
-const bot = new TelegramBot(token, { polling: true });
+const token = process.env.TELEGRAM_BOT_TOKEN;
+const bot = new TelegramBot(token!, { polling: true });
 const daysWeek = [
   "Понедельник",
   "Вторник",
