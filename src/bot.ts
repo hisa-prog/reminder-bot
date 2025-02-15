@@ -1,5 +1,5 @@
 import TelegramBot from "node-telegram-bot-api";
-import nodeCron from 'node-cron';
+import nodeCron from "node-cron";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token!, { polling: true });
@@ -31,42 +31,43 @@ bot.onText(/\/start/, (msg) => {
 });
 
 // Установка напоминания
-bot.onText(/\/remind (.+)/, (msg) => {
+bot.on("message", (msg) => {
   const chatId = msg.chat.id;
+  if (msg.text === "/remind") {
+    bot.sendMessage(
+      chatId,
+      'Пожалуйста введите дату и время в формате "час:день недели"!)'
+    );
+    bot.on("message", (item) => {
+      if (item.text) {
+        const [hour, day] = item.text.split(":");
 
-  bot.sendMessage(
-    chatId,
-    'Пожалуйста введите дату и время в формате "час:день недели"!)'
-  );
-  bot.on("message", (item) => {
-    if (item.text) {
-      const [hour, day] = item.text.split(":");
+        if (
+          Number(hour) < 1 ||
+          Number(hour) > 24 ||
+          Number(day) < 1 ||
+          Number(day) > 7
+        ) {
+          return bot.sendMessage(
+            chatId,
+            "Дата в неверном формате, повторите попытку!"
+          );
+        }
 
-      if (
-        Number(hour) < 1 ||
-        Number(hour) > 24 ||
-        Number(day) < 1 ||
-        Number(day) > 7
-      ) {
+        setCustomReminder(chatId, item.text, bot);
+        return bot.sendMessage(
+          chatId,
+          `Напоминание установлено на ${hour} часов каждый ${
+            daysWeek[Number(day)]
+          }.`
+        );
+      } else
         return bot.sendMessage(
           chatId,
           "Дата в неверном формате, повторите попытку!"
         );
-      }
-
-      setCustomReminder(chatId, item.text, bot);
-      return bot.sendMessage(
-        chatId,
-        `Напоминание установлено на ${hour} часов каждый ${
-          daysWeek[Number(day)]
-        }.`
-      );
-    } else
-      return bot.sendMessage(
-        chatId,
-        "Дата в неверном формате, повторите попытку!"
-      );
-  });
+    });
+  }
 });
 
 // Напоминание каждый вторник
