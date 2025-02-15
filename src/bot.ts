@@ -1,22 +1,22 @@
 import TelegramBot from "node-telegram-bot-api";
-import { scheduleReminder, setCustomReminder } from "./reminders";
+import nodeCron from 'node-cron';
 
 const token = "7881860290:AAErw7n9nApbIQtt-RfwjERf6RfOwov4Se8";
 const bot = new TelegramBot(token, { polling: true });
 const daysWeek = [
-    'Понедельник',
-    'Вторник',
-    'Среду',
-    'Четверг',
-    'Пятницу',
-    'Субботу',
-    'Воскресенье'
-]
+  "Понедельник",
+  "Вторник",
+  "Среду",
+  "Четверг",
+  "Пятницу",
+  "Субботу",
+  "Воскресенье",
+];
 
 bot.setMyCommands([
-    { command: "/start", description: "Приветствие и начало напоминаний" },
-    { command: "/remind", description: "Установить напоминание на каждый день" },
-  ]);
+  { command: "/start", description: "Приветствие и начало напоминаний" },
+  { command: "/remind", description: "Установить напоминание на каждый день" },
+]);
 
 // Команда /start
 bot.onText(/\/start/, (msg) => {
@@ -48,11 +48,38 @@ bot.onText(/\/remind (.+)/, (msg) => {
         Number(day) < 1 ||
         Number(day) > 7
       ) {
-        return bot.sendMessage(chatId, "Дата в неверном формате, повторите попытку!");
+        return bot.sendMessage(
+          chatId,
+          "Дата в неверном формате, повторите попытку!"
+        );
       }
 
-      setCustomReminder(chatId, item.text, bot)
-      return bot.sendMessage(chatId, `Напоминание установлено на ${hour} часов каждый ${daysWeek[Number(day)]}.`);
-    } else return bot.sendMessage(chatId, "Дата в неверном формате, повторите попытку!");
+      setCustomReminder(chatId, item.text, bot);
+      return bot.sendMessage(
+        chatId,
+        `Напоминание установлено на ${hour} часов каждый ${
+          daysWeek[Number(day)]
+        }.`
+      );
+    } else
+      return bot.sendMessage(
+        chatId,
+        "Дата в неверном формате, повторите попытку!"
+      );
   });
 });
+
+// Напоминание каждый вторник
+function scheduleReminder(chatId: number, bot: TelegramBot) {
+  nodeCron.schedule("0 9 * * 2", () => {
+    bot.sendMessage(chatId, "Не забудь проверить счёт!");
+  });
+}
+
+// Установка пользовательского напоминания
+function setCustomReminder(chatId: number, time: string, bot: TelegramBot) {
+  const [hour, day] = time.split(":");
+  nodeCron.schedule(`0 ${hour} * * ${day}`, () => {
+    bot.sendMessage(chatId, "Пора проверить счёт!");
+  });
+}
