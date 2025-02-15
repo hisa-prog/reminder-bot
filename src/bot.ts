@@ -57,7 +57,7 @@ bot.on("message", (msg) => {
         setCustomReminder(chatId, item.text, bot);
         return bot.sendMessage(
           chatId,
-          `Напоминание установлено на ${hour} часов каждый ${
+          `Напоминание установлено на ${hour} часов каждый день в ${
             daysWeek[Number(day)]
           }.`
         );
